@@ -10,10 +10,9 @@
 #
 # 1. Place your files into system folder (delete the placeholder file)
 # 2. Fill in your module's info into module.prop
-# 3. Configure the settings in this file (common/config.sh)
-# 4. For advanced features, add shell commands into the script files under common:
-#    post-fs-data.sh, service.sh
-# 5. For changing props, add your additional/modified props into common/system.prop
+# 3. Configure the settings in this file (config.sh)
+# 4. If you need boot scripts, add them into common/post-fs-data.sh or common/service.sh
+# 5. Add your additional or modified system properties into common/system.prop
 #
 ##########################################################################################
 
@@ -51,10 +50,8 @@ print_modname() {
 ##########################################################################################
 
 # List all directories you want to directly replace in the system
-# By default Magisk will merge your files with the original system
-# Directories listed here however, will be directly mounted to the correspond directory in the system
+# Check the documentations for more info about how Magic Mount works, and why you need this
 
-# You don't need to remove the example below, these values will be overwritten by your own list
 # This is an example
 REPLACE="
 /system/app/Youtube
@@ -63,7 +60,7 @@ REPLACE="
 /system/framework
 "
 
-# Construct your own list here, it will overwrite the example
+# Construct your own list here, it will override the example above
 # !DO NOT! remove this if you don't need to replace anything, leave it empty as it is now
 REPLACE="
 "
@@ -73,6 +70,19 @@ REPLACE="
 ##########################################################################################
 
 set_permissions() {
+  # Only some special files require specific permissions
+  # The default permissions should be good enough for most cases
+
+  # Here are some examples for the set_perm functions:
+
+  # set_perm_recursive  <dirname>                <owner> <group> <dirpermission> <filepermission> <contexts> (default: u:object_r:system_file:s0)
+  # set_perm_recursive  $MODPATH/system/lib       0       0       0755            0644
+
+  # set_perm  <filename>                         <owner> <group> <permission> <contexts> (default: u:object_r:system_file:s0)
+  # set_perm  $MODPATH/system/bin/app_process32   0       2000    0755         u:object_r:zygote_exec:s0
+  # set_perm  $MODPATH/system/bin/dex2oat         0       2000    0755         u:object_r:dex2oat_exec:s0
+  # set_perm  $MODPATH/system/lib/libart.so       0       0       0644
+
   # The following is default permissions, DO NOT remove
   set_perm_recursive  $MODPATH  0  0  0755  0644
 
@@ -83,4 +93,61 @@ set_permissions() {
   set_perm  $MODPATH/system/bin/patchoat        0       2000    0755         u:object_r:zygote_exec:s0
 
   $IS64BIT && set_perm $MODPATH/system/bin/app_process64   0   2000  0755  u:object_r:zygote_exec:s0
+}
+
+##########################################################################################
+# Custom Functions
+##########################################################################################
+
+# This file (config.sh) will be sourced by the main flash script after util_functions.sh
+# If you need custom logic, please add them here as functions, and call these functions in
+# update-binary. Refrain from adding code directly into update-binary, as it will make it
+# difficult for you to migrate your modules to newer template versions.
+# Make update-binary as clean as possible, try to only do function calls in it.
+
+android_version() {
+  case $1 in
+    15) echo '4.0 / SDK'$1;;
+    16) echo '4.1 / SDK'$1;;
+    17) echo '4.2 / SDK'$1;;
+    18) echo '4.3 / SDK'$1;;
+    19) echo '4.4 / SDK'$1;;
+    21) echo '5.0 / SDK'$1;;
+    22) echo '5.1 / SDK'$1;;
+    23) echo '6.0 / SDK'$1;;
+    *)  echo 'SDK'$1;;
+  esac
+}
+
+check_xposed_version() {
+  XVERSION=$(grep_prop version $XPOSEDDIR/system/xposed.prop)
+  XMINSDK=$(grep_prop minsdk $XPOSEDDIR/system/xposed.prop)
+  XMAXSDK=$(grep_prop maxsdk $XPOSEDDIR/system/xposed.prop)
+
+  XEXPECTEDSDK=$(android_version $XMINSDK)
+  if [ "$XMINSDK" != "$XMAXSDK" ]; then
+    XEXPECTEDSDK=$XEXPECTEDSDK' - '$(android_version $XMAXSDK)
+  fi
+
+  ui_print "- Xposed version: $XVERSION"
+  ui_print "- Device platform: $ARCH"
+
+  XVALID=
+  if [ "$API" -ge "$XMINSDK" ]; then
+    if [ "$API" -le "$XMAXSDK" ]; then
+      XVALID=1
+    else
+      ui_print "! Wrong Android version: $APINAME"
+      ui_print "! This file is for: $XEXPECTEDSDK"
+    fi
+  else
+    ui_print "! Wrong Android version: $APINAME"
+    ui_print "! This file is for: $XEXPECTEDSDK"
+  fi
+
+  if [ -z $XVALID ]; then
+    ui_print "! Please download the correct package"
+    ui_print "! for your Android version!"
+    exit 1
+  fi
 }
