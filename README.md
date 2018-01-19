@@ -1,6 +1,6 @@
 ## Systemless Xposed For SDK 23 (Android 6.0)
 
-Please install my modified [XposedInstaller(3.1.4)](https://forum.xda-developers.com/attachment.php?attachmentid=4337506&d=1511193653) to properly detect Systemless Xposed. The APK is signed by my personal key, you might need to uninstall other versions before installing mine.
+Please install my modified [XposedInstaller(3.1.5)](https://forum.xda-developers.com/attachment.php?attachmentid=4393853&d=1516377687) to properly detect Systemless Xposed. The APK is signed by my personal key, you might need to uninstall other versions before installing mine.
 
 ### [More details in support thread](http://forum.xda-developers.com/showthread.php?t=3388268)
 
