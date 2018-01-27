@@ -86,13 +86,19 @@ set_permissions() {
   # The following is default permissions, DO NOT remove
   set_perm_recursive  $MODPATH  0  0  0755  0644
 
-  set_perm_recursive  $MODPATH/system/bin       0       2000    0755    0755
+  set_perm_recursive  $MODPATH/system/bin           0   2000    0755    0755
 
-  set_perm  $MODPATH/system/bin/app_process32   0       2000    0755         u:object_r:zygote_exec:s0
-  set_perm  $MODPATH/system/bin/dex2oat         0       2000    0755         u:object_r:dex2oat_exec:s0
-  set_perm  $MODPATH/system/bin/patchoat        0       2000    0755         u:object_r:zygote_exec:s0
+  set_perm  $MODPATH/system/bin/app_process32       0   2000    0755    u:object_r:zygote_exec:s0
+  $IS64BIT &&\
+  set_perm  $MODPATH/system/bin/app_process64       0   2000    0755    u:object_r:zygote_exec:s0
+  set_perm  $MODPATH/system/bin/dex2oat             0   2000    0755    u:object_r:dex2oat_exec:s0
+  set_perm  $MODPATH/system/bin/patchoat            0   2000    0755    u:object_r:zygote_exec:s0
+  [ -f $MODPATH/system/bin/dexoptanalyzer ] &&\
+  set_perm  $MODPATH/system/bin/dexoptanalyzer      0   2000    0755    u:object_r:dexoptanalyzer_exec:s0
+  [ -f $MODPATH/system/bin/profman ] &&\
+  set_perm  $MODPATH/system/bin/profman             0   2000    0755    u:object_r:profman_exec:s0
 
-  $IS64BIT && set_perm $MODPATH/system/bin/app_process64   0   2000  0755  u:object_r:zygote_exec:s0
+
 }
 
 ##########################################################################################
@@ -115,6 +121,10 @@ android_version() {
     21) echo '5.0 / SDK'$1;;
     22) echo '5.1 / SDK'$1;;
     23) echo '6.0 / SDK'$1;;
+    24) echo '7.0 / SDK'$1;;
+    25) echo '7.1 / SDK'$1;;
+    26) echo '8.0 / SDK'$1;;
+    27) echo '8.1 / SDK'$1;;
     *)  echo 'SDK'$1;;
   esac
 }
