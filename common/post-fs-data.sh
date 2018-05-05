@@ -14,7 +14,9 @@ case $MODDIR in
 esac
 
 mount -o rw,remount /
-cp -f $MODDIR/xposed.prop /xposed.prop
+cp -f $MODDIR/xposed.prop /sbin/xposed.prop
+chcon u:object_r:system_file:s0 /sbin/xposed.prop
+ln -s /sbin/xposed.prop /xposed.prop
 mount -o ro,remount /
 
 ! $IS22 && exit

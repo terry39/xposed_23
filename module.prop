@@ -1,7 +1,7 @@
 id=xposed_23
 name=Xposed Framework (SDK 23)
-version=89.2 (Systemless)
-versionCode=8920
+version=89.3 (Systemless)
+versionCode=8930
 author=rovo89
 description=Xposed Framework by rovo89, ported to Magisk by topjohnwu
 minMagisk=1500

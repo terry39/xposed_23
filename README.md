@@ -6,6 +6,9 @@ Please install my modified [XposedInstaller(3.1.5)](https://forum.xda-developers
 
 ## Changelog
 
+#### v89.3
+- Update scripts for Magisk v16.4+
+
 #### v89.2
 - Update scripts
 
